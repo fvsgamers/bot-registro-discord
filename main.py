@@ -91,7 +91,8 @@ class CargoSelect(discord.ui.Select):
             placeholder="Selecione os cargos",
             min_values=1,
             max_values=len(options),
-            options=options
+            options=options,
+            custom_id="cargo_select_menu"  # 🔥 agora é persistente
         )
 
     async def callback(self, interaction: discord.Interaction):
@@ -101,7 +102,7 @@ class CargoSelect(discord.ui.Select):
 
 class RegistroView(discord.ui.View):
     def __init__(self):
-        super().__init__(timeout=None)
+        super().__init__(timeout=None)  # 🔥 removido erro de persistência
         self.add_item(CargoSelect())
 
 # ================= APROVAÇÃO ================= #
@@ -123,7 +124,11 @@ class AprovacaoView(discord.ui.View):
             return False
         return True
 
-    @discord.ui.button(label="✅ Aprovar", style=discord.ButtonStyle.success)
+    @discord.ui.button(
+        label="✅ Aprovar",
+        style=discord.ButtonStyle.success,
+        custom_id="botao_aprovar"
+    )
     async def aprovar(self, interaction: discord.Interaction, button):
 
         guild = interaction.guild
@@ -138,7 +143,7 @@ class AprovacaoView(discord.ui.View):
             if role and role in membro.roles:
                 await membro.remove_roles(role)
 
-        # Adiciona cargos selecionados
+        # Adiciona novos cargos
         for key in self.cargos:
             cargo_info = CARGOS[key]
             role = guild.get_role(cargo_info["id"])
@@ -162,14 +167,18 @@ class AprovacaoView(discord.ui.View):
         try:
             await membro.edit(nick=novo_nick)
         except:
-            pass
+            pass  # evita crash se não tiver permissão
 
         await interaction.response.edit_message(
             content="✅ Registro aprovado com sucesso.",
             view=None
         )
 
-    @discord.ui.button(label="❌ Rejeitar", style=discord.ButtonStyle.danger)
+    @discord.ui.button(
+        label="❌ Rejeitar",
+        style=discord.ButtonStyle.danger,
+        custom_id="botao_rejeitar"
+    )
     async def rejeitar(self, interaction: discord.Interaction, button):
         await interaction.response.edit_message(
             content="❌ Registro rejeitado.",
@@ -185,10 +194,13 @@ async def painel(ctx):
         await ctx.send("❌ Este comando só pode ser usado no canal de registro.")
         return
 
-    await ctx.send(
-        "📋 **Painel de Registro**\nSelecione seus cargos abaixo:",
-        view=RegistroView()
-    )
+    try:
+        await ctx.send(
+            "📋 **Painel de Registro**\nSelecione seus cargos abaixo:",
+            view=RegistroView()
+        )
+    except discord.Forbidden:
+        print("ERRO: Bot não tem permissão para enviar mensagem neste canal.")
 
 # ================= ONLINE ================= #
 
@@ -198,22 +210,5 @@ async def on_ready():
     bot.add_view(RegistroView())
 
 # ================= START ================= #
-from threading import Thread
-from flask import Flask
-
-app = Flask('')
-
-@app.route('/')
-def home():
-    return "Bot está online!"
-
-def run():
-    app.run(host='0.0.0.0', port=8000)
-
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
-
-keep_alive()
 
 bot.run(TOKEN)
