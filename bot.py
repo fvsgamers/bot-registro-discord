@@ -2,13 +2,19 @@ import discord
 from discord.ext import commands
 from config import CARGOS, CARGO_APROVADOR_ID, CATEGORIA_REGISTROS_ID, PRIORIDADE_NICK
 import os
-#from dotenv import load_dotenv
 
-#load_dotenv()
+# ================= CONFIG ================= #
+
 TOKEN = os.getenv("TOKEN")
+
+if TOKEN is None:
+    raise Exception("TOKEN não configurado nas variáveis de ambiente da Koyeb!")
+
+CANAL_PAINEL_ID = 1459275771301593353
 
 intents = discord.Intents.default()
 intents.members = True
+intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -68,7 +74,6 @@ class RegistroModal(discord.ui.Modal, title="📋 Solicitação de Registro"):
             ephemeral=True
         )
 
-
 # ================= SELECT ================= #
 
 class CargoSelect(discord.ui.Select):
@@ -94,12 +99,10 @@ class CargoSelect(discord.ui.Select):
             RegistroModal(self.values)
         )
 
-
 class RegistroView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
         self.add_item(CargoSelect())
-
 
 # ================= APROVAÇÃO ================= #
 
@@ -129,13 +132,13 @@ class AprovacaoView(discord.ui.View):
         if not membro:
             return
 
-        # Remove cargos antigos da lista
+        # Remove cargos antigos
         for c in CARGOS.values():
             role = guild.get_role(c["id"])
             if role and role in membro.roles:
                 await membro.remove_roles(role)
 
-        # Adiciona todos selecionados
+        # Adiciona cargos selecionados
         for key in self.cargos:
             cargo_info = CARGOS[key]
             role = guild.get_role(cargo_info["id"])
@@ -156,7 +159,10 @@ class AprovacaoView(discord.ui.View):
         else:
             novo_nick = f"{self.nome} {self.sobrenome}"
 
-        await membro.edit(nick=novo_nick)
+        try:
+            await membro.edit(nick=novo_nick)
+        except:
+            pass
 
         await interaction.response.edit_message(
             content="✅ Registro aprovado com sucesso.",
@@ -170,21 +176,27 @@ class AprovacaoView(discord.ui.View):
             view=None
         )
 
-
 # ================= COMANDO ================= #
 
 @bot.command()
 async def painel(ctx):
+
+    if ctx.channel.id != CANAL_PAINEL_ID:
+        await ctx.send("❌ Este comando só pode ser usado no canal de registro.")
+        return
+
     await ctx.send(
         "📋 **Painel de Registro**\nSelecione seus cargos abaixo:",
         view=RegistroView()
     )
 
+# ================= ONLINE ================= #
 
 @bot.event
 async def on_ready():
-    print(f"Bot online como {bot.user}")
+    print(f"✅ Bot online como {bot.user}")
     bot.add_view(RegistroView())
 
+# ================= START ================= #
 
 bot.run(TOKEN)
