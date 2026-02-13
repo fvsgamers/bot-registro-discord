@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from config import CARGOS, CARGO_APROVADOR_ID, CATEGORIA_REGISTROS_ID, PRIORIDADE_NICK
 import os
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
