@@ -4,7 +4,7 @@ from config import CARGOS, CARGO_APROVADOR_ID, CATEGORIA_REGISTROS_ID, PRIORIDAD
 import os
 #from dotenv import load_dotenv
 
-load_dotenv()
+#load_dotenv()
 TOKEN = os.getenv("TOKEN")
 
 intents = discord.Intents.default()
