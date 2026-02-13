@@ -1,3 +1,7 @@
+# =========================
+# CONFIG SISTEMA REGISTRO
+# =========================
+
 CARGOS = {
     "staff": {
         "nome": "🛡️ Staff",
@@ -31,8 +35,22 @@ CARGOS = {
     }
 }
 
+# Cargo que pode aprovar
 CARGO_APROVADOR_ID = 1459264090105970696
+
+# Categoria onde os canais serão criados
 CATEGORIA_REGISTROS_ID = 1471732973467468008
 
-# prioridade do nickname
+# Prioridade do prefixo do nickname
 PRIORIDADE_NICK = ["staff", "mod", "vip", "membro"]
+
+# =========================
+# CARGOS FIXOS DO SISTEMA
+# =========================
+
+REMOVER_CARGOS_APOS_APROVACAO = [
+    1459264089762304115,  # visitante
+    1471729781635813503
+]
+
+CARGO_FIXO_APOS_APROVACAO = 1471729614455046307
